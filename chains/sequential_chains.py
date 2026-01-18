@@ -4,20 +4,21 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 load_dotenv()
 
-prompt = PromptTemplate(
-    template = "generate five interesting facts about this topic:{topic}",
+prompt1 = PromptTemplate(
+    template= "Generate a detailed report on the topic: {topic}",
     input_variables= ['topic']
     
 )
+prompt2 = PromptTemplate(
+    template= "Summarize the following report:\n{report}",
+    input_variables= ['report']
+)
+
 model = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
 
 parser = StrOutputParser()
 
-chain = prompt | model | parser
+chain = prompt1 | model | parser | prompt2 | model | parser
 
 result = chain.invoke({'topic':'Space Exploration'})
-
-# print("Final Result:\n", result)
-
-#this is used to print the graph of the chain 
-chain.get_graph().print_ascii()
+print("Final Summary:\n", result)
