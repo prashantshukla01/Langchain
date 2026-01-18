@@ -1,34 +1,30 @@
-from langchain_huggingface import ChatHuggingFace , HuggingFaceEndpoint
-from dotenv import load_dotenv
-from langchain_core import PromptTemplate
-load_dotenv()
+from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
-llm = HuggingFaceEndpoint(
-    repo_id="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-    task="text-generation",
-    
+# 1️⃣ Hugging Face endpoint (CHAT / conversational model)
+llm_endpoint = HuggingFaceEndpoint(
+    repo_id="HuggingFaceH4/zephyr-7b-beta",
+    task="conversational",        # 🔥 REQUIRED
+    max_new_tokens=256,
+    temperature=0.7
 )
-model = ChatHuggingFace(llm = llm)
 
-#1 prompt --> detailed report
-template1 = PromptTemplate(
-    template = "Write a detailed report on the {topic}",
-    input_variable = ["topic"]
-    
+# 2️⃣ Wrap with ChatHuggingFace (MANDATORY for chat models)
+chat_model = ChatHuggingFace(llm=llm_endpoint)
+
+# 3️⃣ Prompt
+prompt = PromptTemplate(
+    template="Explain {topic} in simple words.",
+    input_variables=["topic"]
 )
-#2 prompt --> summary of the report
-template2 = PromptTemplate(
-    template = "Summarize the following report: {report}",
-    input_variable = ["report"]
-    
-)   
 
-prompt1 = template1.invoke({'topic':'Blackhole'})
+# 4️⃣ Output parser (string)
+parser = StrOutputParser()
 
-result = model.invoke(prompt1)
+# 5️⃣ Chain (Prompt → Chat Model → String)
+chain = prompt | chat_model | parser
 
-prompt2= template2.invoke({'report':result.content})
-
-result1 = model.invoke(prompt2)
-print("Detailed Report:\n", result.content)
-print("Summary:\n", result1.content)
+# 6️⃣ Invoke
+result = chain.invoke({"topic": "Black Hole"})
+print(result)
