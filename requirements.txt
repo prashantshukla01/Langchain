@@ -27,3 +27,8 @@ numpy
 scikit-learn
 
 streamlit
+
+langchain_community 
+
+langchain-text-splitters
+
